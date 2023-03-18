@@ -77,21 +77,47 @@ async function addRole() {
     }
 }
 
-// async function addEmployee() {
-//     const data = await inquirer
-//         .prompt([
-//             {
-//                 type: 'input',
-//                 name: 'departmentName',
-//                 message: 'What is the name of the department you would like to add?',
-//             }
-//         ])
-//     const results = await db.promise().query(`INSERT INTO department(name) VALUES ("${data.departmentName}");`)
-//     if(results) {
-//         console.log("SUCCESS!")
-//         employeeMenu()
-//     }
-// }
+async function addEmployee() {
+    const roleName = await db.promise().query(`SELECT title FROM role;`);
+    const mgrName = await db.promise().query(`SELECT first_name, last_name FROM employee;`);
+    console.log(roleName[0]);
+    console.log(mgrName[0]);
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'firstName',
+                message: 'What is the first name of the employee you would like to add?',
+            },
+            {
+                type: 'input',
+                name: 'lastName',
+                message: 'What is the last name of the employee you would like to add?',
+            },
+            {
+                type: 'input',
+                name: 'lastName',
+                message: 'What is the last name of the employee you would like to add?',
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: "Which role does the employee have?",
+                choices: roleName[0],
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: "Who is the employee's manager?",
+                choices: mgrName[0]
+            }
+        ])
+    const results = await db.promise().query(`INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("${data.firstName}"), ("${data.lastName}"), (${data.role}), (${data.manager});`)
+    if(results) {
+        console.log("SUCCESS!")
+        employeeMenu()
+    }
+}
 
 // async function updateRole() {
 //     const data = await inquirer
@@ -130,9 +156,9 @@ async function employeeMenu() {
         if(results.employeeMenu === 'Add Role') {
             addRole()
         }
-        // if(results.employeeMenu === 'Add Employee') {
-        //     addEmployee()
-        // }
+        if(results.employeeMenu === 'Add Employee') {
+            addEmployee()
+        }
         // if(results.employeeMenu === 'Update Employee Role') {
         //     updateRole()
         // }
