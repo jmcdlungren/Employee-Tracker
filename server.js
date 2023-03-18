@@ -50,8 +50,8 @@ async function addDepartment() {
 }
 
 async function addRole() {
+    const dptName = await db.promise().query(`SELECT name FROM department;`)
     const data = await inquirer
-    // const dptName = await db.promise().query(`SELECT name FROM department;`)
         .prompt([
             {
                 type: 'input',
@@ -67,7 +67,7 @@ async function addRole() {
                 type: 'list',
                 name: 'department',
                 message: "Which department does the role belong to?",
-                choices: [db.promise().query(`SELECT name FROM department;`)]
+                choices: dptName[0]
             }
         ])
     const results = await db.promise().query(`INSERT INTO role(title, salary, department_id) VALUES ("${data.role}", ${data.salary}, ${data.department});`)
