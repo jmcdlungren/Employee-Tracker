@@ -33,6 +33,36 @@ async function viewEmployees() {
     employeeMenu();
 }
 
+async function viewEmployeesByMgr() {
+    const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+    const fullName = mgrName[0].map((item) => {
+        return {
+            name: `${item.first_name} ${item.last_name}`,
+            value: item.value
+        }
+    });
+    
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'manager',
+                message: "Which manager's employees would you like to see?",
+                choices: fullName
+            }
+        ])
+
+    const results = await db.promise().query(`SELECT * FROM employee WHERE manager_id = ${data.manager};`)
+    console.table(results[0]);
+    employeeMenu();
+}
+
+async function sortEmployeesByMgr() {
+const results = await db.promise().query(`SELECT * FROM employee ORDER BY manager_id;`)
+    console.table(results[0]);
+    employeeMenu();
+}
+
 async function addDepartment() {
     const data = await inquirer
         .prompt([
@@ -51,7 +81,6 @@ async function addDepartment() {
 
 async function addRole() {
     const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
-    // const dptName = await db.promise().query(`SELECT * FROM role JOIN department ON role.department_id = department.id`)
     const data = await inquirer
         .prompt([
             {
@@ -147,9 +176,15 @@ async function updateRole() {
                 name: 'role',
                 message: "What is the employee's new role?",
                 choices: roleName[0]
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: "Who is the employee's manager?",
+                choices: fullName
             }
         ])
-    const results = await db.promise().query(`UPDATE employee SET role_id = ${data.role} WHERE id = ${data.employee}`)
+    const results = await db.promise().query(`UPDATE employee SET role_id = ${data.role}, manager_id = ${data.manager} WHERE id = ${data.employee}`)
     if(results) {
         console.table("SUCCESS!")
         employeeMenu()
@@ -163,7 +198,7 @@ async function employeeMenu() {
                 type: 'list',
                 name: 'employeeMenu',
                 message: 'Welcome to Employee Tracker. Please select what you would like to do.',
-                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Quit'],
+                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View All Employees by Manager', 'Sort All Employees by Manager', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit'],
             }
         ])
         if(results.employeeMenu === 'View All Departments') {
@@ -174,6 +209,12 @@ async function employeeMenu() {
         }
         if(results.employeeMenu === 'View All Employees') {
             viewEmployees()
+        }
+        if(results.employeeMenu === 'View All Employees by Manager') {
+            viewEmployeesByMgr()
+        }
+        if(results.employeeMenu === 'Sort All Employees by Manager') {
+            sortEmployeesByMgr()
         }
         if(results.employeeMenu === 'Add Department') {
             addDepartment()
@@ -187,7 +228,9 @@ async function employeeMenu() {
         if(results.employeeMenu === 'Update Employee Role') {
             updateRole()
         }
-
+        if(results.employeeMenu === 'View All Employees by Manager') {
+            viewEmployeesByMgr()
+        }
 }
 
 employeeMenu();
