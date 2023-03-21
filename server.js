@@ -50,7 +50,8 @@ async function addDepartment() {
 }
 
 async function addRole() {
-    const dptName = await db.promise().query(`SELECT name FROM department;`)
+    const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
+    // const dptName = await db.promise().query(`SELECT * FROM role JOIN department ON role.department_id = department.id`)
     const data = await inquirer
         .prompt([
             {
@@ -78,10 +79,15 @@ async function addRole() {
 }
 
 async function addEmployee() {
-    const roleName = await db.promise().query(`SELECT title FROM role;`);
-    const mgrName = await db.promise().query(`SELECT first_name, last_name FROM employee;`);
-    console.log(roleName[0]);
-    console.log(mgrName[0]);
+    const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
+    const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+    const fullName = mgrName[0].map((item) => {
+        return {
+            name: `${item.first_name} ${item.last_name}`,
+            value: item.value
+        }
+    });
+    
     const data = await inquirer
         .prompt([
             {
@@ -109,10 +115,10 @@ async function addEmployee() {
                 type: 'list',
                 name: 'manager',
                 message: "Who is the employee's manager?",
-                choices: mgrName[0]
+                choices: fullName
             }
         ])
-    const results = await db.promise().query(`INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("${data.firstName}"), ("${data.lastName}"), (${data.role}), (${data.manager});`)
+    const results = await db.promise().query(`INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("${data.firstName}", "${data.lastName}", ${data.role}, ${data.manager});`)
     if(results) {
         console.log("SUCCESS!")
         employeeMenu()
