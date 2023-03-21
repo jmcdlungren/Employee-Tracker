@@ -125,17 +125,36 @@ async function addEmployee() {
     }
 }
 
-// async function updateRole() {
-//     const data = await inquirer
-//         .prompt([
-//             {
-//                 type: 'list',
-//                 name: 'updateRole',
-//                 message: "What is the employee's new role?",
-//                 choices: []
-//             }
-//         ])
-// }
+async function updateRole() {
+    const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
+    const empName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+    const fullName = empName[0].map((item) => {
+        return {
+            name: `${item.first_name} ${item.last_name}`,
+            value: item.value
+        }
+    });
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: "Which employee needs to be updated?",
+                choices: fullName
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: "What is the employee's new role?",
+                choices: roleName[0]
+            }
+        ])
+    const results = await db.promise().query(`UPDATE employee SET role_id = ${data.role} WHERE id = ${data.employee}`)
+    if(results) {
+        console.table("SUCCESS!")
+        employeeMenu()
+    }
+}
 
 async function employeeMenu() {
     const results = await inquirer
@@ -165,9 +184,9 @@ async function employeeMenu() {
         if(results.employeeMenu === 'Add Employee') {
             addEmployee()
         }
-        // if(results.employeeMenu === 'Update Employee Role') {
-        //     updateRole()
-        // }
+        if(results.employeeMenu === 'Update Employee Role') {
+            updateRole()
+        }
 
 }
 
