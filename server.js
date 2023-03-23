@@ -19,19 +19,19 @@ async function viewDepartments() {
     const results = await db.promise().query('SELECT * FROM department;')
     console.table(results[0]);
     employeeMenu();
-}
+};
 
 async function viewRoles() {
     const results = await db.promise().query('SELECT * FROM role;')
     console.table(results[0]);
     employeeMenu();
-}
+};
 
 async function viewEmployees() {
     const results = await db.promise().query('SELECT * FROM employee;')
     console.table(results[0]);
     employeeMenu();
-}
+};
 
 async function viewEmployeesByMgr() {
     const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
@@ -55,13 +55,13 @@ async function viewEmployeesByMgr() {
     const results = await db.promise().query(`SELECT * FROM employee WHERE manager_id = ${data.manager};`)
     console.table(results[0]);
     employeeMenu();
-}
+};
 
 async function sortEmployeesByMgr() {
 const results = await db.promise().query(`SELECT * FROM employee ORDER BY manager_id;`)
     console.table(results[0]);
     employeeMenu();
-}
+};
 
 async function viewEmployeesByDpt() {
     const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
@@ -78,13 +78,13 @@ async function viewEmployeesByDpt() {
     const results = await db.promise().query(`SELECT * FROM employee WHERE department_id = ${data.department};`)
     console.table(results[0]);
     employeeMenu();
-}
+};
 
 async function sortEmployeesByDpt() {
 const results = await db.promise().query(`SELECT * FROM employee ORDER BY department_id;`)
     console.table(results[0]);
     employeeMenu();
-}
+};
 
 async function addDepartment() {
     const data = await inquirer
@@ -100,7 +100,7 @@ async function addDepartment() {
         console.log("SUCCESS!")
         employeeMenu()
     }
-}
+};
 
 async function addRole() {
     const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
@@ -128,7 +128,7 @@ async function addRole() {
         console.log("SUCCESS!")
         employeeMenu()
     }
-}
+};
 
 async function addEmployee() {
     const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
@@ -175,7 +175,7 @@ async function addEmployee() {
         console.log("SUCCESS!")
         employeeMenu()
     }
-}
+};
 
 async function updateRole() {
     const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
@@ -212,7 +212,7 @@ async function updateRole() {
         console.table("SUCCESS!")
         employeeMenu()
     }
-}
+};
 
 async function updateMgr() {
     const empName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
@@ -242,7 +242,67 @@ async function updateMgr() {
         console.table("SUCCESS!")
         employeeMenu()
     }
-}
+};
+
+async function removeDpt() {
+    const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'department',
+                message: "Which department needs to be removed?",
+                choices: dptName[0]
+            }
+        ])
+    const results = await db.promise().query(`DELETE FROM department WHERE id = ${data.department}`)
+    if(results) {
+        console.table("SUCCESS!")
+        employeeMenu()
+    }
+};
+
+async function removeRole() {
+    const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'role',
+                message: "Which role needs to be removed?",
+                choices: roleName[0]
+            }
+        ])
+    const results = await db.promise().query(`DELETE FROM role WHERE id = ${data.role}`)
+    if(results) {
+        console.table("SUCCESS!")
+        employeeMenu()
+    }
+};
+
+async function removeEmployee() {
+    const empName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+    const fullName = empName[0].map((item) => {
+        return {
+            name: `${item.first_name} ${item.last_name}`,
+            value: item.value
+        }
+    });
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: "Which employee needs to be removed?",
+                choices: fullName
+            }
+        ])
+    const results = await db.promise().query(`DELETE FROM employee WHERE id = ${data.employee}`)
+    if(results) {
+        console.table("SUCCESS!")
+        employeeMenu()
+    }
+};
 
 async function employeeMenu() {
     const results = await inquirer
@@ -251,48 +311,57 @@ async function employeeMenu() {
                 type: 'list',
                 name: 'employeeMenu',
                 message: 'Welcome to Employee Tracker. Please select what you would like to do.',
-                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View All Employees by Manager', 'Sort All Employees by Manager', 'View All Employees by Department', 'Sort All Employees by Department', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Exit'],
+                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View All Employees by Manager', 'Sort All Employees by Manager', 'View All Employees by Department', 'Sort All Employees by Department', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Remove Department', 'Remove Role', 'Remove Employee', 'Exit'],
             }
         ])
         if(results.employeeMenu === 'View All Departments') {
             viewDepartments()
-        }
+        };
         if(results.employeeMenu === 'View All Roles') {
             viewRoles()
-        }
+        };
         if(results.employeeMenu === 'View All Employees') {
             viewEmployees()
-        }
+        };
         if(results.employeeMenu === 'View All Employees by Manager') {
             viewEmployeesByMgr()
-        }
+        };
         if(results.employeeMenu === 'Sort All Employees by Manager') {
             sortEmployeesByMgr()
-        }
+        };
         if(results.employeeMenu === 'View All Employees by Department') {
             viewEmployeesByDpt()
-        }
+        };
         if(results.employeeMenu === 'Sort All Employees by Department') {
             sortEmployeesByDpt()
-        }
+        };
         if(results.employeeMenu === 'Add Department') {
             addDepartment()
-        }
+        };
         if(results.employeeMenu === 'Add Role') {
             addRole()
-        }
+        };
         if(results.employeeMenu === 'Add Employee') {
             addEmployee()
-        }
+        };
         if(results.employeeMenu === 'Update Employee Role') {
             updateRole()
-        }
+        };
         if(results.employeeMenu === 'Update Employee Manager') {
             updateMgr()
-        }
+        };
         if(results.employeeMenu === 'View All Employees by Manager') {
             viewEmployeesByMgr()
-        }
-}
+        };
+        if(results.employeeMenu === 'Remove Department') {
+            removeDpt()
+        };
+        if(results.employeeMenu === 'Remove Role') {
+            removeRole()
+        };
+        if(results.employeeMenu === 'Remove Employee') {
+            removeEmployee()
+        };
+};
 
 employeeMenu();
