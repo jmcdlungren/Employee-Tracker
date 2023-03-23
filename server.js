@@ -63,6 +63,29 @@ const results = await db.promise().query(`SELECT * FROM employee ORDER BY manage
     employeeMenu();
 }
 
+async function viewEmployeesByDpt() {
+    const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'department',
+                message: "Which department's employees would you like to see?",
+                choices: dptName[0]
+            }
+        ])
+
+    const results = await db.promise().query(`SELECT * FROM employee WHERE department_id = ${data.department};`)
+    console.table(results[0]);
+    employeeMenu();
+}
+
+async function sortEmployeesByDpt() {
+const results = await db.promise().query(`SELECT * FROM employee ORDER BY department_id;`)
+    console.table(results[0]);
+    employeeMenu();
+}
+
 async function addDepartment() {
     const data = await inquirer
         .prompt([
@@ -191,6 +214,36 @@ async function updateRole() {
     }
 }
 
+async function updateMgr() {
+    const empName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+    const fullName = empName[0].map((item) => {
+        return {
+            name: `${item.first_name} ${item.last_name}`,
+            value: item.value
+        }
+    });
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: "Which employee needs to be updated?",
+                choices: fullName
+            },
+            {
+                type: 'list',
+                name: 'manager',
+                message: "Who is the employee's new manager?",
+                choices: fullName
+            }
+        ])
+    const results = await db.promise().query(`UPDATE employee SET manager_id = ${data.manager} WHERE id = ${data.employee}`)
+    if(results) {
+        console.table("SUCCESS!")
+        employeeMenu()
+    }
+}
+
 async function employeeMenu() {
     const results = await inquirer
         .prompt([
@@ -198,7 +251,7 @@ async function employeeMenu() {
                 type: 'list',
                 name: 'employeeMenu',
                 message: 'Welcome to Employee Tracker. Please select what you would like to do.',
-                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View All Employees by Manager', 'Sort All Employees by Manager', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit'],
+                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View All Employees by Manager', 'Sort All Employees by Manager', 'View All Employees by Department', 'Sort All Employees by Department', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Exit'],
             }
         ])
         if(results.employeeMenu === 'View All Departments') {
@@ -216,6 +269,12 @@ async function employeeMenu() {
         if(results.employeeMenu === 'Sort All Employees by Manager') {
             sortEmployeesByMgr()
         }
+        if(results.employeeMenu === 'View All Employees by Department') {
+            viewEmployeesByDpt()
+        }
+        if(results.employeeMenu === 'Sort All Employees by Department') {
+            sortEmployeesByDpt()
+        }
         if(results.employeeMenu === 'Add Department') {
             addDepartment()
         }
@@ -227,6 +286,9 @@ async function employeeMenu() {
         }
         if(results.employeeMenu === 'Update Employee Role') {
             updateRole()
+        }
+        if(results.employeeMenu === 'Update Employee Manager') {
+            updateMgr()
         }
         if(results.employeeMenu === 'View All Employees by Manager') {
             viewEmployeesByMgr()
