@@ -86,6 +86,22 @@ const results = await db.promise().query(`SELECT * FROM employee ORDER BY depart
     employeeMenu();
 };
 
+async function viewDepartmentBudget() {
+    const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
+    const data = await inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'department',
+                message: "Which department's budget would you like to see?",
+                choices: dptName[0]
+            }
+        ])
+        const results = await db.promise().query(`SELECT SUM(salary) FROM role WHERE department_id = ${data.department};`)
+        console.table(results[0]);
+        employeeMenu();
+    };
+
 async function addDepartment() {
     const data = await inquirer
         .prompt([
@@ -311,7 +327,7 @@ async function employeeMenu() {
                 type: 'list',
                 name: 'employeeMenu',
                 message: 'Welcome to Employee Tracker. Please select what you would like to do.',
-                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View All Employees by Manager', 'Sort All Employees by Manager', 'View All Employees by Department', 'Sort All Employees by Department', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Remove Department', 'Remove Role', 'Remove Employee', 'Exit'],
+                choices: ['View All Departments', 'View All Roles', 'View All Employees', 'View All Employees by Manager', 'Sort All Employees by Manager', 'View All Employees by Department', 'Sort All Employees by Department', 'View Department Budget', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Remove Department', 'Remove Role', 'Remove Employee', 'Exit'],
             }
         ])
         if(results.employeeMenu === 'View All Departments') {
@@ -334,6 +350,9 @@ async function employeeMenu() {
         };
         if(results.employeeMenu === 'Sort All Employees by Department') {
             sortEmployeesByDpt()
+        };
+        if(results.employeeMenu === 'View Department Budget') {
+            viewDepartmentBudget()
         };
         if(results.employeeMenu === 'Add Department') {
             addDepartment()
