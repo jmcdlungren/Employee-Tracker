@@ -37,9 +37,8 @@ async function viewEmployees() {
 };
 
 async function viewEmployeesByMgr() {
-
     const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
-    const fullName = mgrName[0].map((item) => {
+    const fullName = await mgrName[0].map((item) => {
         return {
             name: `${item.first_name} ${item.last_name}`,
             value: item.value
@@ -57,22 +56,18 @@ async function viewEmployeesByMgr() {
         ])
 
     const results = await db.promise().query(`SELECT * FROM employee WHERE manager_id = ${data.manager};`)
-    if (results) {
-        console.log("\n");
-        console.table(results[0]);
-        console.log("\n");
-        employeeMenu();
-    };
+    console.log("\n");
+    console.table(results[0]);
+    console.log("\n");
+    employeeMenu();
 };
 
 async function sortEmployeesByMgr() {
     const results = await db.promise().query(`SELECT * FROM employee ORDER BY manager_id;`)
-    if (results) {
-        console.log("\n");
-        console.table(results[0]);
-        console.log("\n");
-        employeeMenu();
-    };
+    console.log("\n");
+    console.table(results[0]);
+    console.log("\n");
+    employeeMenu();
 };
 
 async function viewEmployeesByDpt() {
@@ -118,6 +113,7 @@ async function viewDepartmentBudget() {
             }
         ])
     const results = await db.promise().query(`SELECT SUM(salary) FROM role WHERE department_id = ${data.department};`)
+    console.log("\n");
     console.table(results[0]);
     console.log("\n");
     employeeMenu();
