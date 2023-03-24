@@ -1,4 +1,4 @@
-// Import and require mysql2
+// Import and require mysql2, dotenv, and inquirer
 const mysql = require('mysql2');
 require("dotenv").config();
 const inquirer = require('inquirer');
@@ -18,22 +18,26 @@ const db = mysql.createConnection(
 async function viewDepartments() {
     const results = await db.promise().query('SELECT * FROM department;')
     console.table(results[0]);
+    console.log("\n");
     employeeMenu();
 };
 
 async function viewRoles() {
     const results = await db.promise().query('SELECT * FROM role;')
     console.table(results[0]);
+    console.log("\n");
     employeeMenu();
 };
 
 async function viewEmployees() {
     const results = await db.promise().query('SELECT * FROM employee;')
     console.table(results[0]);
+    console.log("\n");
     employeeMenu();
 };
 
 async function viewEmployeesByMgr() {
+
     const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
     const fullName = mgrName[0].map((item) => {
         return {
@@ -53,14 +57,22 @@ async function viewEmployeesByMgr() {
         ])
 
     const results = await db.promise().query(`SELECT * FROM employee WHERE manager_id = ${data.manager};`)
-    console.table(results[0]);
-    employeeMenu();
+    if (results) {
+        console.log("\n");
+        console.table(results[0]);
+        console.log("\n");
+        employeeMenu();
+    };
 };
 
 async function sortEmployeesByMgr() {
     const results = await db.promise().query(`SELECT * FROM employee ORDER BY manager_id;`)
-    console.table(results[0]);
-    employeeMenu();
+    if (results) {
+        console.log("\n");
+        console.table(results[0]);
+        console.log("\n");
+        employeeMenu();
+    };
 };
 
 async function viewEmployeesByDpt() {
@@ -76,14 +88,22 @@ async function viewEmployeesByDpt() {
         ])
 
     const results = await db.promise().query(`SELECT * FROM employee WHERE department_id = ${data.department};`)
-    console.table(results[0]);
-    employeeMenu();
+    if (results) {
+        console.log("\n");
+        console.table(results[0]);
+        console.log("\n");
+        employeeMenu();
+    };
 };
 
 async function sortEmployeesByDpt() {
     const results = await db.promise().query(`SELECT * FROM employee ORDER BY department_id;`)
-    console.table(results[0]);
-    employeeMenu();
+    if (results) {
+        console.log("\n");
+        console.table(results[0]);
+        console.log("\n");
+        employeeMenu();
+    };
 };
 
 async function viewDepartmentBudget() {
@@ -99,6 +119,7 @@ async function viewDepartmentBudget() {
         ])
     const results = await db.promise().query(`SELECT SUM(salary) FROM role WHERE department_id = ${data.department};`)
     console.table(results[0]);
+    console.log("\n");
     employeeMenu();
 };
 
@@ -398,6 +419,7 @@ async function startEmployeeMenu() {
     ░░░██║░░░██╔══██╗██╔══██║██║░░██╗██╔═██╗░██╔══╝░░██╔══██╗
     ░░░██║░░░██║░░██║██║░░██║╚█████╔╝██║░╚██╗███████╗██║░░██║
     ░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝`)
+    console.log("\n");
     employeeMenu();
 };
 
