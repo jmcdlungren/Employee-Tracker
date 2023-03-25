@@ -3,6 +3,7 @@ const mysql = require('mysql2');
 require("dotenv").config();
 const inquirer = require('inquirer');
 
+// Creates connection to SQL, connecting to the .env file
 const db = mysql.createConnection(
     {
         host: 'localhost',
@@ -15,22 +16,7 @@ const db = mysql.createConnection(
     console.log(`Connected to the employee_db database.`)
 );
 
-// async function createName() {
-const empName = db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
-// const fullName = empName[0].map((item) => {
-//     return {
-//         name: `${item.first_name} ${item.last_name}`,
-//         value: item.value
-//     }
-// })
-// return fullName
-// }
-
-// console.log(createName())
-
-console.log(empName)
-
-
+// Function to View Departments - has SQL select all columns from the department table. The results are then shown in a table.
 async function viewDepartments() {
     const results = await db.promise().query('SELECT * FROM department;')
     console.table(results[0]);
@@ -38,6 +24,7 @@ async function viewDepartments() {
     employeeMenu();
 };
 
+// Function to View Roles - has SQL select all columns from the role table. The results are then shown in a table.
 async function viewRoles() {
     const results = await db.promise().query('SELECT * FROM role;')
     console.table(results[0]);
@@ -45,6 +32,7 @@ async function viewRoles() {
     employeeMenu();
 };
 
+// Function to View Employees - has SQL select all columns from the employee table. The results are then shown in a table.
 async function viewEmployees() {
     const results = await db.promise().query('SELECT * FROM employee;')
     console.table(results[0]);
@@ -52,14 +40,16 @@ async function viewEmployees() {
     employeeMenu();
 };
 
+// Function to View Employees by Manager. SQL first selects the columns first_name, last_name, & id from the employee table. The fullName variable then creates a function to return first_name & last_name as one full "name" and returns the id as "value" from the previous statement. The fullName variable is then used as the choices within the inquirer.prompt as fullName is returned as an array. The results are then shown in a table.
+// **Note: This function is currently creating issues in the terminal as it runs double. I have not figured out the reasoning for this as of this time.
 async function viewEmployeesByMgr() {
-    // const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
-    // const fullName = await mgrName[0].map((item) => {
-    //     return {
-    //         name: `${item.first_name} ${item.last_name}`,
-    //         value: item.value
-    //     }
-    // });
+    const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+    const fullName = await mgrName[0].map((item) => {
+        return {
+            name: `${item.first_name} ${item.last_name}`,
+            value: item.value
+        }
+    });
 
     const data = await inquirer
         .prompt([
@@ -78,6 +68,7 @@ async function viewEmployeesByMgr() {
     employeeMenu();
 };
 
+// Similar to the viewEmployees function, this one selects all from the employee table; however, it is now ordering by the manager_id column to sort the employees by manager. The results are then shown in a table.
 async function sortEmployeesByMgr() {
     const results = await db.promise().query(`SELECT * FROM employee ORDER BY manager_id;`)
     console.log("\n");
@@ -86,6 +77,7 @@ async function sortEmployeesByMgr() {
     employeeMenu();
 };
 
+// Function to View Employees by Department. SQL selects the name column and id column (as value) from the department table. The name and value is required for the choices array. This can then be used as choices within the inquirer.prompt. The results are then shown in a table.
 async function viewEmployeesByDpt() {
     const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
     const data = await inquirer
@@ -107,6 +99,7 @@ async function viewEmployeesByDpt() {
     };
 };
 
+// Similar to the viewDepartments function, this one selects all from the department table; however, it is now ordering by the department_id column to sort the employees by department. The results are then shown in a table.
 async function sortEmployeesByDpt() {
     const results = await db.promise().query(`SELECT * FROM employee ORDER BY department_id;`)
     if (results) {
@@ -117,6 +110,7 @@ async function sortEmployeesByDpt() {
     };
 };
 
+// Function to View Deparment Budget. SQL selects the name column and id column (as value) from the department table. The name and value is required for the choices array. This can then be used as choices within the inquirer.prompt. SQL then is asked to select the sum of the salary column within the department table where the department id matches what was selected from the inquirer.prompt. The results are then shown in a table.
 async function viewDepartmentBudget() {
     const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
     const data = await inquirer
@@ -135,6 +129,7 @@ async function viewDepartmentBudget() {
     employeeMenu();
 };
 
+// The inquirer.prompt asks for the name of the department. When the user enters this in, the answer is then inputted as a name within the name column within the department table.
 async function addDepartment() {
     const data = await inquirer
         .prompt([
@@ -151,6 +146,7 @@ async function addDepartment() {
     }
 };
 
+// SQL selects the name column and id column (as value) from the department table. The name and value is required for the choices array. This can then be used as choices within the inquirer.prompt for the department question. The inquirer.prompt asks for the name of the role, the salary, and then has the user choose from a list of choices for the department. When the user enters all of the information in, the answer is then inputted in the appropriate columns within the role table.
 async function addRole() {
     const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
     const data = await inquirer
@@ -179,6 +175,7 @@ async function addRole() {
     }
 };
 
+// SQL first selects the name column and id column (as value) from the role table. The name and value is required for the choices array. This can then be used as choices within the inquirer.prompt for the role question. SQL then selects the columns first_name, last_name, & id from the employee table. The fullName variable then creates a function to return first_name & last_name as one full "name" and returns the id as "value" from the previous statement. The fullName variable is then used as the choices within the inquirer.prompt as fullName is returned as an array. The inquirer.prompt asks for the first name & last name of the employee, and then has the user choose from a list of choices for the manager, and then a list of choices for the employee's role. When the user enters all of the information in, the answer is then inputted in the appropriate columns within the employee table.
 async function addEmployee() {
     const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
     const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
@@ -195,11 +192,6 @@ async function addEmployee() {
                 type: 'input',
                 name: 'firstName',
                 message: 'What is the first name of the employee you would like to add?',
-            },
-            {
-                type: 'input',
-                name: 'lastName',
-                message: 'What is the last name of the employee you would like to add?',
             },
             {
                 type: 'input',
@@ -226,6 +218,7 @@ async function addEmployee() {
     }
 };
 
+// SQL first selects the name column and id column (as value) from the role table. The name and value is required for the choices array. This can then be used as choices within the inquirer.prompt for the role question. SQL then selects the columns first_name, last_name, & id from the employee table. The fullName variable then creates a function to return first_name & last_name as one full "name" and returns the id as "value" from the previous statement. The fullName variable is then used as the choices within the inquirer.prompt as fullName is returned as an array. The inquirer.prompt asks for the name of the employee, and then has the user choose from a list of choices for the new manager, and then a list of choices for the employee's role. When the user enters all of the information in, the answer is then inputted in the appropriate columns within the employee table.
 async function updateRole() {
     const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
     const empName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
@@ -263,6 +256,7 @@ async function updateRole() {
     }
 };
 
+// SQL first selects the columns first_name, last_name, & id from the employee table. The fullName variable then creates a function to return first_name & last_name as one full "name" and returns the id as "value" from the previous statement. The fullName variable is then used as the choices within the inquirer.prompt as fullName is returned as an array. The inquirer.prompt asks for the name of the employee, and then has the user choose from a list of choices for the employee's new manager. When the user enters all of the information in, the answer is then inputted in the appropriate columns within the employee table.
 async function updateMgr() {
     const empName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
     const fullName = empName[0].map((item) => {
@@ -293,6 +287,7 @@ async function updateMgr() {
     }
 };
 
+// SQL selects the name column and id column (as value) from the department table. The name and value is required for the choices array. This can then be used as choices within the inquirer.prompt for the department question. The inquirer.prompt asks for the name of the department that needs to be removed. The information is then inputted in a SQL request to have the department deleted from the department table.
 async function removeDpt() {
     const dptName = await db.promise().query(`SELECT name, id AS value FROM department;`)
     const data = await inquirer
@@ -311,6 +306,7 @@ async function removeDpt() {
     }
 };
 
+// SQL selects the name column and id column (as value) from the role table. The name and value is required for the choices array. This can then be used as choices within the inquirer.prompt for the role question. The inquirer.prompt asks for the name of the role that needs to be removed. The information is then inputted in a SQL request to have the role deleted from the role table.
 async function removeRole() {
     const roleName = await db.promise().query(`SELECT title AS name, id AS value FROM role;`);
     const data = await inquirer
@@ -329,6 +325,7 @@ async function removeRole() {
     }
 };
 
+// SQL first selects the columns first_name, last_name, & id from the employee table. The fullName variable then creates a function to return first_name & last_name as one full "name" and returns the id as "value" from the previous statement. The fullName variable is then used as the choices within the inquirer.prompt as fullName is returned as an array. The inquirer.prompt asks for the name of the employee that needs to be removed. The information is then inputted in a SQL request to have the employee deleted from the employee table.
 async function removeEmployee() {
     const empName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
     const fullName = empName[0].map((item) => {
@@ -353,6 +350,7 @@ async function removeEmployee() {
     }
 };
 
+// This is the main menu that the user selects what they would like to do from. As each option is selected, the appropriate function is ran to complete the requested action. If the user selects "Exit", the program ends.
 async function employeeMenu() {
     const results = await inquirer
         .prompt([
@@ -416,6 +414,7 @@ async function employeeMenu() {
     };
 };
 
+// This function starts the program when the user runs "node server" in the terminal. A designed "Employee Tracker" prompt is shown and the employeeMenu function is ran.
 async function startEmployeeMenu() {
     console.log(`
     ███████╗███╗░░░███╗██████╗░██╗░░░░░░█████╗░██╗░░░██╗███████╗███████╗
@@ -435,4 +434,5 @@ async function startEmployeeMenu() {
     employeeMenu();
 };
 
+// This calls the function startEmployeeMenu above so that it can run once the user enters "node server" in the terminal.
 startEmployeeMenu();
