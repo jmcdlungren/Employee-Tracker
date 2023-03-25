@@ -44,7 +44,7 @@ async function viewEmployees() {
 // **Note: This function is currently creating issues in the terminal as it runs double. I have not figured out the reasoning for this as of this time.
 async function viewEmployeesByMgr() {
     const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
-    const fullName = await mgrName[0].map((item) => {
+    const fullName = mgrName[0].map((item) => {
         return {
             name: `${item.first_name} ${item.last_name}`,
             value: item.value
