@@ -15,6 +15,22 @@ const db = mysql.createConnection(
     console.log(`Connected to the employee_db database.`)
 );
 
+// async function createName() {
+const empName = db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+// const fullName = empName[0].map((item) => {
+//     return {
+//         name: `${item.first_name} ${item.last_name}`,
+//         value: item.value
+//     }
+// })
+// return fullName
+// }
+
+// console.log(createName())
+
+console.log(empName)
+
+
 async function viewDepartments() {
     const results = await db.promise().query('SELECT * FROM department;')
     console.table(results[0]);
@@ -37,13 +53,13 @@ async function viewEmployees() {
 };
 
 async function viewEmployeesByMgr() {
-    const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
-    const fullName = await mgrName[0].map((item) => {
-        return {
-            name: `${item.first_name} ${item.last_name}`,
-            value: item.value
-        }
-    });
+    // const mgrName = await db.promise().query(`SELECT first_name, last_name, id AS value FROM employee;`);
+    // const fullName = await mgrName[0].map((item) => {
+    //     return {
+    //         name: `${item.first_name} ${item.last_name}`,
+    //         value: item.value
+    //     }
+    // });
 
     const data = await inquirer
         .prompt([
